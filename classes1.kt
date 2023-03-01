@@ -1,3 +1,20 @@
+/**
+ * 支持类型推导
+ * 代码末尾不需要分号
+ * 字符串模版
+ * 原始字符串，支持复杂文本格式
+ * 单一表达式函数，简介且符合直觉
+ * 函数支持参数默认值，替代 Builder 模式的同时，可读性还很强
+ * if 和 when 可作为表达式
+ * 强制区分“可空变量类型”和“不可空变量类型”，规避空指针异常
+ * 推崇不可变性（val），对于没有修改需求的变量，IDE 会智能提示开发者将 var 改为 val
+ * 基础类型不支持隐式类型转换，这样避免很多隐藏问题
+ * 数组的访问行为和集合统一，不会出现 array.length, list.size 的情况
+ * 函数调用自持命名参数，提高可读性，在后续维护代码的时候不容易出错
+ * when 表达式，强制要求逻辑分支完整，写出来的逻辑永远不会有漏洞
+ * 
+ */
+
 fun main(args: Array<String>) {
 
     // 变量在
@@ -23,6 +40,9 @@ fun main(args: Array<String>) {
     // Double: 64bit, Float: 32bit, Long: 64bit, Int: 32bit, Short: 16bit, Char: 16bit, Byte: 8bit,
     // Boolean: 8bit
     // 可以发现，由于在 Kotlin 中，整型数字“1”被看作是对象了，所以我们可以调用它的成员方法 toDouble()，而这样的代码在 Java 中是无法实现的。
+    // 在 Kotlin 中，定义非空的原始类型，编译器会自动编译成 Java 的原始类型
+    // val i:Int ==>  int i
+    // val i1:Int? ==> Integer i1
     val i: Double = 1.toDouble()
 
     // 空安全
@@ -63,7 +83,7 @@ fun main(args: Array<String>) {
     // Char 代表单个字符 比如'A'、'B'、'C'，字符应该用单引号括起来
 
     val c: Char = 'A'
-    val i3: Int = c.code // 编译器报错
+    val i3: Int = c.toInt() // 编译器报错
 
     // 字符串：String
     // 字符串（String），顾名思义，就是一连串的字符。和 Java 一样，Kotlin 中的字符串也是不可变的。在大部分情况下，我们会使用双引号来表示字符串的字面量，这一点跟 Java
@@ -96,5 +116,109 @@ fun main(args: Array<String>) {
     print(originString)
 
     // 数组
-    // 
+    // 在 Kotlin 当中，我们一般会使用 arrayOf() 来创建数组，括号当中可以用于传递数组元素进行初始化，同时，Kotlin 编译器也会根据传入的参数进行类型推导
+
+    val arrayInt = arrayOf(1, 2, 3) // 推导为 int 数组
+    val arrayString = arrayOf("apple", "pear")  // 推导为字符串数组
+
+
+
+     // 函数声明
+
+    /*
+    关键字    函数名          参数类型   返回值类型
+    ↓        ↓                ↓       ↓      */
+    fun helloFunction(name: String): String {
+        return "Hello $name !"
+    }
+    /*   ↑
+    * 花括号内为：函数体
+    */
+    /*
+    * 可以看到，在这段代码中：
+    * 使用了 fun 关键字来定义函数；函数名称，使用的是驼峰命名法（大部分情况下）；
+    * 函数参数，是以 (name: String) 这样的形式传递的，这代表了参数类型为 String 类型；
+    * 返回值类型，紧跟在参数的后面；
+    * 最后是花括号内的函数体，它代表了整个函数的逻辑。
+    */
+
+    // 函数体实际上只有一行代码。那么针对这种情况，我们其实就可以省略函数体的花括号，直接使用“=”来连接，将其变成一种类似变量赋值的函数形式, 
+    // 这种写法，我们称之为单一表达式函数。由于 Kotlin 支持类型推导，我们在使用单一表达式形式的时候，返回值的类型也可以省略.
+    fun helloFunction2(name: String): String = "Hello $name !"
+
+
+    // 流程控制
+    // if when for while
+
+    // if
+    // if 语句，在程序当中主要是用于逻辑判断。Kotlin 当中的 if 与 Java 当中的基本一致：
+    val i23 = 1
+    if (i23 > 0) {
+        print("Big")
+    } else {
+        print("Small")
+    }
+    // 输出结果：
+    // Big
+
+    // 不过 Kotlin 的 if，并不是程序语句（Statement）那么简单，它还可以作为表达式（Expression）来使用
+    val i24 = 1
+    val message = if (i24 > 0) "Big" else "Small"
+
+    print(message)
+
+    // 输出结果：
+    // Big
+
+    // Elvis 表达式, 简化 if else 逻辑判断。
+    fun getLength(text: String?): Int {
+        return text?.length ?: 0
+    }
+
+    // when
+    // when 语句，在程序当中主要也是用于逻辑判断的。当我们的代码逻辑只有两个分支的时候，我们一般会使用 if/else，而在大于两个逻辑分支的情况下，我们使用 when。
+
+    val i31: Int = 1
+
+    when(i31) {
+        1 -> print("一")
+        2 -> print("二")
+        else -> print("i 不是一也不是二")
+    }
+
+    // 输出结果：
+    // 一
+
+    // when 语句有点像 Java 里的 switch case 语句，不过 Kotlin 的 when 更加强大，它同时也可以作为表达式，为变量赋值
+
+    val i32: Int = 1
+
+    val message32 = when(i32) {
+        1 -> "一"
+        2 -> "二"
+        else -> "i 不是一也不是二" // 如果去掉这行，会报错
+    }
+
+    print(message32)
+    // 另外，与 switch 不一样的是，when 表达式要求它里面的逻辑分支必须是完整的。举个例子，以上的代码，如果去掉 else 分支，编译器将报错，原因是：i 的值不仅仅只有 1 和 2，这两个分支并没有覆盖所有的情况，所以会报错。
+
+    // 循环迭代：while 与 for
+    // 首先 while 循环，我们一般是用于重复执行某些代码，它在使用上和 Java 也没有什么区别
+    // 在 Java 当中，for 也会经常被用于循环，经常被用来替代 while。不过，Kotlin 的 for 语句更多的是用于“迭代”。比如，以下代码就代表了迭代 array 这个数组里的所有元素，程序会依次打印出：“1、2、3”。
+    val array31 = arrayOf(1, 2, 3)
+    for (i33 in array31) { println(i33)}
+    // 而除了迭代数组和集合以外，Kotlin 还支持迭代一个“区间”。
+    //首先，要定义一个区间，我们可以使用“..”来连接数值区间的两端，比如“1..3”就代表从 1 到 3 的闭区间，左闭右闭
+    val oneToThree = 1..3 // 代表 [1, 3]
+    // 甚至，我们还可以逆序迭代一个区间，比如：
+
+    for (i34 in 6 downTo 0 step 2) {
+        println(i34)
+    }
+    // 输出结果：
+    // 6
+    // 4
+    // 2
+    // 0
+    // 以上代码的含义就是逆序迭代一个区间，从 6 到 0，每次迭代的步长是 2，这意味着 6 迭代过后，到 4、2，最后到 0。需要特别注意的是，逆序区间我们不能使用“6..0”来定义，如果用这样的方式来定义的话，代码将无法正常运行。
 }
